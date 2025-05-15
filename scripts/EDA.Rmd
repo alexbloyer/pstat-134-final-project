@@ -1,0 +1,75 @@
+---
+title: "134 Project"
+output: pdf_document
+date: "2025-05-15"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, warning=FALSE, error=FALSE, message=FALSE}
+
+comments <- read.csv("labeled_comments.csv")
+
+str(comments)
+
+summary(comments)
+
+table(comments$sentiment)
+
+library(ggplot2)
+
+#overall sentiment distribution
+ggplot(comments, aes(x = sentiment)) +
+  geom_bar(fill = "skyblue") +
+  theme_minimal() +
+  labs(title = "Distribution of Sentiment Labels")
+
+#sentiment by subreddit
+ggplot(comments, aes(x = subreddit, fill = sentiment)) +
+  geom_bar(position = "fill") +
+  theme_minimal() +
+  labs(title = "Proportion of Sentiment by Subreddit", y = "Proportion") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#upvotes distribution by sentiment
+ggplot(comments, aes(x = comment_karma, fill = sentiment)) +
+  geom_histogram(position = "identity", alpha = 0.5, bins = 50) +
+  theme_minimal() +
+  scale_x_log10() +
+  labs(title = "Upvotes Distribution by Sentiment")
+
+
+#comment length by sentiment
+comments$comment_length <- nchar(comments$body)
+
+ggplot(comments, aes(x = comment_length, fill = sentiment)) +
+  geom_histogram(position = "identity", alpha = 0.6, bins = 50) +
+  theme_minimal() +
+  labs(title = "Comment Length by Sentiment")
+
+
+
+
+#comment sentiment by time
+comments$created_datetime <- as.POSIXct(comments$created_utc, origin = "1970-01-01", tz = "UTC")
+
+library(dplyr)
+
+comments %>%
+  count(created_datetime) %>%
+  ggplot(aes(x = created_datetime, y = n)) +
+  geom_line(color = "steelblue") +
+  theme_minimal() +
+  labs(title = "Number of Comments Over Time", x = "Date", y = "Comment Count")
+
+comments %>%
+  count(created_datetime, sentiment) %>%
+  ggplot(aes(x = created_datetime, y = n, color = sentiment)) +
+  geom_line() +
+  theme_minimal() +
+  labs(title = "Sentiment Over Time", x = "Date", y = "Number of Comments")
+
+```
+
